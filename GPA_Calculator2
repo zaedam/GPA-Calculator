@@ -1,7 +1,4 @@
-package HW.HW5_GUI;
-
 import java.awt.*;
-
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
