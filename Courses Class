@@ -1,0 +1,112 @@
+public class Course {
+	
+	//Fields
+	String courseName;
+	double gradePoint; //Each letter grade's corresponding grade point (i.e. A = 4.0)
+	String grade;      //Letter grade
+	int creds;         //Credits
+	
+	//Constructors (depending on which fields were given)
+	Course(String courseName, String grade, int creds) {
+		this.creds = creds;
+		this.courseName = courseName;
+		this.grade = grade;
+				if (this.grade.equals("A+") || this.grade.equals("A")) {
+					gradePoint = 4.0;
+				}
+				else if (this.grade.equals("A-")) {
+					gradePoint = 3.7;
+				}
+				else if (this.grade.equals("B+")) {
+					gradePoint = 3.3;
+				}
+				else if (this.grade.equals("B")) {
+					gradePoint = 3.0;
+				}
+				else if (this.grade.equals("B-")) {
+					gradePoint = 2.7;
+				}
+				else if (this.grade.equals("C+")) {
+					gradePoint = 2.3;
+				}
+				else if (this.grade.equals("C")) {
+					gradePoint = 2.0;
+				}
+				else if (this.grade.equals("C-")) {
+					gradePoint = 1.7;
+				}
+				else if (this.grade.equals("D+")) {
+					gradePoint = 1.3;
+				}
+				else if (this.grade.equals("D")) {
+					gradePoint = 1.0;
+				}
+				else if (this.grade.equals("D-")) {
+					gradePoint = 0.7;
+				}
+				else if (this.grade.equals("F")) {
+					gradePoint = 0.0;
+				}
+	}
+	
+	Course(String grade, int creds) {
+		this.creds = creds;
+		this.grade = grade;
+		this.courseName = "";
+
+		
+		if (this.grade.equals("A+") || this.grade.equals("A")) {
+			gradePoint = 4.0;
+		}
+		else if (this.grade.equals("A-")) {
+			gradePoint = 3.7;
+		}
+		else if (this.grade.equals("B+")) {
+			gradePoint = 3.3;
+		}
+		else if (this.grade.equals("B")) {
+			gradePoint = 3.0;
+		}
+		else if (this.grade.equals("B-")) {
+			gradePoint = 2.7;
+		}
+		else if (this.grade.equals("C+")) {
+			gradePoint = 2.3;
+		}
+		else if (this.grade.equals("C")) {
+			gradePoint = 2.0;
+		}
+		else if (this.grade.equals("C-")) {
+			gradePoint = 1.7;
+		}
+		else if (this.grade.equals("D+")) {
+			gradePoint = 1.3;
+		}
+		else if (this.grade.equals("D")) {
+			gradePoint = 1.0;
+		}
+		else if (this.grade.equals("D-")) {
+			gradePoint = 0.7;
+		}
+		else if (this.grade.equals("F")) {
+			gradePoint = 0.0;
+		}
+	}
+	
+	Course(int creds, String courseName) {
+		this.creds = creds;
+		this.courseName = courseName;
+		this.grade = "";
+		this.gradePoint = -1;
+	}
+
+	
+	Course(int creds) {
+		this.creds = creds;
+		this.courseName = "";
+		this.grade = "";
+		this.gradePoint = -1;
+	}	
+		
+	
+} //END Course CLASS
