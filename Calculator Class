@@ -1,0 +1,516 @@
+package HW.HW5_GUI;
+
+import java.awt.*;
+
+import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.ScrollPaneConstants;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+	
+/*
+	Zaeda Meherin (zm5du)
+	GPA Calculator
+	Courses with grades are current or past courses taken.
+	Courses without a grade are anticipated classes, which are 
+	used to calculate the required GPA needed to reach desired GPA
+ */
+
+
+	public class GPA_Calculator2 extends JFrame {
+
+		// COURSE FIELDS
+		ArrayList<Course> courseList = new ArrayList<Course>(); //list of courses
+		JTextPane courseListTextPane; //Text pane displaying the list of courses
+		JScrollPane courseListScrollPane; //Text pane with a scroll bar
+		JTextField courseNoTextField; //Text field for which course to remove
+
+		// SUMMARY FIELDS 	
+		String[] lettergrades = {"", "A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"};
+		String[] creditslist = {"1", "2", "3", "4"};
+		JLabel currentGPALabel = new JLabel(""); //Displays current GPA
+		JTextField desiredGPAtextField = new JTextField(3); //Text field for desired GPA
+		JLabel reqGPALabel = new JLabel("Required GPA: "); //"Required GPA to reach desired GPA: "
+		
+		/**
+		 * Defines every component to go on the pane (window)
+		 * Lays all the components together on the pane in the end
+		 * @param pane
+		 */
+		public void addComponentsToPane(Container pane) {
+
+			JLabel CourseLabel = new JLabel("— COURSES —");
+			CourseLabel.setFont(new Font("Century Gothic", Font.PLAIN, 15));
+	        
+			JLabel courseNameLabel = new JLabel("Course*");
+			Labelformatter(courseNameLabel);
+			JTextField coursetextField = new JTextField(21);
+			coursetextField.setFont(new Font("Century Gothic", Font.PLAIN, 13));
+							
+			JLabel gradeLabel = new JLabel("Grade*");
+			Labelformatter(gradeLabel);
+			
+			JComboBox letterGradeDropDown = new JComboBox(lettergrades);
+			letterGradeDropDown.setBackground(Color.WHITE);
+			letterGradeDropDown.setFont(new Font("Century Gothic", Font.PLAIN, 13));
+
+			JLabel creditsLabel = new JLabel("Credits");
+			Labelformatter(creditsLabel);
+
+			JComboBox creditsDropDown = new JComboBox(creditslist);
+			creditsDropDown.setBackground(Color.WHITE);
+			creditsDropDown.setFont(new Font("Century Gothic", Font.PLAIN, 13));
+
+			JLabel optionalLabel = new JLabel("* Optional");
+			optionalLabel.setFont(new Font("Century Gothic", Font.ITALIC, 12));
+
+			//Displays List of Courses
+			courseListTextPane = new JTextPane();
+			courseListTextPane.setPreferredSize(new Dimension(325, 100));
+			courseListTextPane.setEditable(false);
+			courseListTextPane.setFont(new Font("Century Gothic", Font.PLAIN, 13));
+
+			//Adds the text pane to a scroll pane (text pane with scroll bar)
+			courseListScrollPane = new JScrollPane(courseListTextPane); 
+			courseListScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+			
+			
+			//ButtonListener for Adding and Removing Courses
+
+			class ButtonListener1 implements ActionListener {
+				
+					public void actionPerformed(ActionEvent e) {
+						
+							if (e.getActionCommand().equals("Add Enter")) {
+									
+								String courseName = coursetextField.getText();
+								String grade = (String) letterGradeDropDown.getSelectedItem();
+								int creds = Integer.parseInt((String) creditsDropDown.getSelectedItem());
+								
+								addCourse(courseName, grade, creds);
+								
+								coursetextField.setText("");  //resets the textbox to empty
+								letterGradeDropDown.setSelectedItem(lettergrades[0]);   //resets the dropdown to empty
+								
+							}
+						 	
+							if (e.getActionCommand().equals("Remove Enter")) {
+								
+								int courseToRemove = Integer.parseInt(courseNoTextField.getText());
+								removeCourse(courseToRemove);
+					
+							}
+							
+					} //END actionPerformed 
+					
+				} // END ButtonListener1 Class
+
+
+			// Add Course Button
+			JButton addCourseButton = new JButton("Add Course");
+			addCourseButton.setActionCommand("Add Enter");
+			addCourseButton.addActionListener(new ButtonListener1());
+			Buttonformatter(addCourseButton);
+			
+			//Remove Course Button
+			JLabel removeCourseLabel = new JLabel("Enter Course # ");
+			Labelformatter(removeCourseLabel);
+			courseNoTextField = new JTextField(3);
+			
+			JButton removeButton = new JButton("Remove");
+			removeButton.setActionCommand("Remove Enter");
+			removeButton.addActionListener(new ButtonListener1());		
+			Buttonformatter(removeButton);
+
+
+			//ButtonListener for Removing All Courses
+
+			class ButtonListener2 implements ActionListener {
+				public void actionPerformed(ActionEvent e) {					
+					removeAllCourses();
+				}
+			}
+
+			//Remove All Button
+			JButton removeAllButton = new JButton("Remove All");
+			removeAllButton.addActionListener(new ButtonListener2());
+			Buttonformatter(removeAllButton);
+
+			
+			//ButtonListener Calculating Current GPA
+			class ButtonListener3 implements ActionListener {		
+					public void actionPerformed(ActionEvent e) {
+						
+						double gpa = calculateGPA();
+						if (gpa > 0) {
+							String currentGPA = String.valueOf(gpa);
+							currentGPALabel.setText(currentGPA);
+							currentGPALabel.setFont(new Font("Century Gothic", Font.PLAIN, 25));
+							currentGPALabel.setForeground(Color.BLACK);
+						}
+						else {
+							currentGPALabel.setText("");
+						}
+						
+						String output = tostring();
+						courseListTextPane.setText(output);
+					}
+			}
+			
+			JButton calculatecurrentGPAButton = new JButton("Calculate GPA");
+			calculatecurrentGPAButton.addActionListener(new ButtonListener3());
+			Buttonformatter(calculatecurrentGPAButton);
+			Labelformatter(reqGPALabel);
+			
+			//ButtonListener for calculating the required GPA needed to calculate the desired GPA
+			//Generates warning message if needed
+			class ButtonListener4 implements ActionListener {	
+					public void actionPerformed(ActionEvent e) {
+						double reqGPA = calculateDesiredGPA();
+						
+						if (reqGPA > 4.0) {
+							currentGPALabel.setText("<html><body style='text-align: center'>WARNING<br/>Your required GPA to reach your<br/>desired GPA is greater than 4.0<br/>Try adding more credits<html>");
+							currentGPALabel.setFont(new Font("Century Gothic", Font.PLAIN, 13));
+							currentGPALabel.setForeground(Color.RED);
+						}
+
+						else {
+							currentGPALabel.setText("");
+						}
+						
+						String output = tostring();
+						courseListTextPane.setText(output);
+					}
+			}
+			
+			JLabel desiredGPALabel = new JLabel("Desired GPA: ");
+			Labelformatter(desiredGPALabel);
+			desiredGPAtextField = new JTextField(3);
+			desiredGPAtextField.setFont(new Font("Century Gothic", Font.PLAIN, 13));
+			
+			JButton desiredGPAButton = new JButton("Enter");
+			desiredGPAButton.addActionListener(new ButtonListener4());
+			Buttonformatter(desiredGPAButton);
+		
+		    JLabel summaryLabel = new JLabel("— SUMMARY —");
+		    summaryLabel.setFont(new Font("Century Gothic", Font.PLAIN, 15));
+		    
+		    
+		    
+		    // PANEL 1A — COURSES —
+			JPanel panel1A = new JPanel();
+	        panel1A.setBackground(new Color(250,250,250));
+			panel1A.setPreferredSize(new Dimension(380,50));
+			panel1A.add(CourseLabel);
+			
+			// PANEL 1B - Enter course name, grade, credits
+	        JPanel panel1B = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	        panel1B.setBackground(new Color(250,250,250));
+			panel1B.setPreferredSize(new Dimension(330,45));
+
+			// PANEL 1Ba
+			JPanel panel1Ba = new JPanel(new BorderLayout());
+			panel1Ba.setBackground(new Color(250,250,250));
+			panel1Ba.setPreferredSize(new Dimension(200,40));
+
+			panel1Ba.add(courseNameLabel, BorderLayout.NORTH);
+			panel1Ba.add(coursetextField, BorderLayout.SOUTH);
+			
+			// PANEL 1Bb
+			JPanel panel1Bb = new JPanel(new BorderLayout());
+			panel1Bb.setBackground(new Color(250,250,250));
+			panel1Bb.setPreferredSize(new Dimension(50,40));
+
+			panel1Bb.add(gradeLabel, BorderLayout.NORTH);
+			panel1Bb.add(letterGradeDropDown, BorderLayout.SOUTH);
+
+			// PANEL 1Bc
+			JPanel panel1Bc = new JPanel(new BorderLayout());
+			panel1Bc.setBackground(new Color(250,250,250));
+			panel1Bc.setPreferredSize(new Dimension(50,40));
+
+			panel1Bc.add(creditsLabel, BorderLayout.NORTH);
+			panel1Bc.add(creditsDropDown, BorderLayout.SOUTH);
+			
+			// PANEL 1BB
+			JPanel panel1BB = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			panel1BB.setBackground(new Color(250,250,250));
+			panel1BB.setPreferredSize(new Dimension(330,25));
+			panel1BB.add(optionalLabel);
+			
+			panel1B.add(panel1Ba);
+			panel1B.add(panel1Bb);
+			panel1B.add(panel1Bc);
+	        
+			// PANEL 1C - Add Button
+			JPanel panel1C = new JPanel();
+			panel1C.setLayout(new FlowLayout());
+			panel1C.setBackground(new Color(250,250,250));
+			panel1C.setPreferredSize(new Dimension(380,60));
+			panel1C.add(addCourseButton);
+			
+			// PANEL 1D - List of courses
+			JPanel panel1D = new JPanel();
+			panel1D.setLayout(new FlowLayout());
+			panel1D.setBackground(new Color(250,250,250));
+			panel1D.setPreferredSize(new Dimension(380,115));
+			panel1D.add(courseListScrollPane);
+			
+			// PANEL 1E - Remove Buttons
+			JPanel panel1E = new JPanel();
+			panel1E.setBackground(new Color(250,250,250));
+			panel1E.setPreferredSize(new Dimension(380,50));
+			panel1E.add(removeCourseLabel);
+			panel1E.add(courseNoTextField);
+			panel1E.add(removeButton);
+			panel1E.add(removeAllButton);
+			
+			// PANEL 1 - COURSES Section
+			JPanel panel1 = new JPanel();
+			panel1.setBackground(new Color(250,250,250));
+			panel1.setPreferredSize(new Dimension(390,380));
+			
+			//Adding all subpanels to Panel 1
+			panel1.add(panel1A);
+			panel1.add(panel1B);
+			panel1.add(panel1BB);
+			panel1.add(panel1C);
+			panel1.add(panel1D);
+			panel1.add(panel1E);
+			
+			// PANEL 2 - Summary Section ---------------------------------------------------------------------------------------
+			JPanel panel2 = new JPanel();
+			panel2.setPreferredSize(new Dimension(280,300)); //300,300 or 280,300
+			panel2.setBackground(new Color(250,250,250));
+			
+			JPanel panel2A = new JPanel(new FlowLayout(FlowLayout.CENTER)); //— SUMMARY —
+			panel2A.setPreferredSize(new Dimension(390,60));
+			panel2A.setBackground(new Color(250,250,250));
+			panel2A.add(summaryLabel);
+
+			
+			//PANEL 2B - Calculate Current GPA
+			JPanel panel2B = new JPanel();
+			panel2B.setPreferredSize(new Dimension(150,40));
+			panel2B.setBackground(new Color(250,250,250));
+			panel2B.add(calculatecurrentGPAButton);
+		
+			//PANEL 2BB
+			JPanel panel2BB = new JPanel(new BorderLayout());
+			panel2BB.setPreferredSize(new Dimension(275,100));
+			panel2BB.setBackground(new Color(250,250,250));
+			panel2BB.setBackground(new Color(250,250,250));
+			currentGPALabel.setHorizontalAlignment(JLabel.CENTER);
+			currentGPALabel.setVerticalAlignment(JLabel.CENTER);
+			panel2BB.add(currentGPALabel, BorderLayout.CENTER);
+			
+			//PANEL 2C - Desired GPA
+			JPanel panel2C = new JPanel();
+			panel2C.setPreferredSize(new Dimension(400,35));
+			panel2C.setBackground(new Color(250,250,250));
+			panel2C.add(desiredGPALabel);
+			panel2C.add(desiredGPAtextField);
+			panel2C.add(desiredGPAButton);
+			
+			//PANEL 2D - Required GPA
+			JPanel panel2D = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			panel2D.setPreferredSize(new Dimension(220,50));
+			panel2D.setBackground(new Color(250,250,250));
+			panel2D.add(reqGPALabel);
+			
+			//PANEL 2E
+			JPanel panel2E = new JPanel(new FlowLayout());
+			panel2E.setPreferredSize(new Dimension(300,80));
+			panel2E.setBackground(new Color(250,250,250));
+			
+			panel2.add(panel2A);
+			panel2.add(panel2B);
+			panel2.add(panel2BB);
+			panel2.add(panel2C);
+			panel2.add(panel2D);
+			panel2.add(panel2E);
+			
+			pane.setBackground(new Color(250,250,250));
+			pane.add(panel1, BorderLayout.WEST);
+			pane.add(panel2, BorderLayout.EAST);	
+
+		}// END addComponentsToPane
+
+		
+		public JLabel Labelformatter(JLabel l) {
+			l.setFont(new Font("Century Gothic", Font.PLAIN, 13));
+			l.setForeground(Color.BLACK);
+			return l;
+		}
+
+		public JButton Buttonformatter(JButton b) {
+			b.setBorderPainted(false);
+			b.setFocusPainted(false);
+			b.setBackground(new Color(66, 165, 245));
+			b.setFont(new Font("Century Gothic", Font.PLAIN, 15));
+			b.setForeground(Color.WHITE);
+			return b;
+		}
+		
+		public String tostring() {
+			String retval = "";
+			
+			for (int i = 0; i < courseList.size(); i++) {
+				int courseNo = i+1;
+				Course c = courseList.get(i);
+
+				if (c.courseName.length()!=0 && c.grade.length()!=0 && c.creds == (int) c.creds) {
+					retval += "Course "+courseNo+": "+c.courseName+" ("+c.creds+" credits): "+c.grade+"\n";
+				}
+				else if (c.courseName.length()!=0 && c.grade.length()==0 && c.creds == (int) c.creds) {
+					retval += "Course "+courseNo+": "+c.courseName+" ("+c.creds+" credits)"+"\n";
+				}
+				else if (c.courseName.length()==0 && c.grade.length()!=0 && c.creds == (int) c.creds) {
+					retval += "Course "+courseNo+": ("+c.creds+" credits): "+c.grade+"\n";
+				}
+				else if (c.courseName.length()==0 && c.grade.length()==0 && c.creds == (int) c.creds) {
+					retval += "Course "+courseNo+": ("+c.creds+" credits)"+"\n";
+				}
+			}
+
+			return retval;
+		}
+
+		/**
+		 * Each if statement checks for which textAreas are given.
+		 * Then, creates a new course, a new course #, and outputs it under the course list section.
+		 * Then increments the counter by 1 so that the next course added is given the next course #  */
+		public void addCourse(String courseName, String grade, int creds) {
+						
+			if (courseName.length()!=0 && grade.length()!=0 && creds == (int) creds) {
+
+				Course c = new Course(courseName, grade, creds);
+				courseList.add(c);
+				
+				String output = this.tostring();
+				courseListTextPane.setText(output);
+			}
+			else if (courseName.length()!=0 && grade.length()==0 && creds == (int) creds) {
+				Course c = new Course(creds, courseName);
+				courseList.add(c);
+				String output = this.tostring();
+				courseListTextPane.setText(output);
+			}
+			else if (courseName.length()==0 && grade.length()!=0 && creds == (int) creds) {
+				Course c = new Course(grade, creds);
+				courseList.add(c);
+				String output = this.tostring();
+				courseListTextPane.setText(output);
+			}
+			else if (courseName.length()==0 && grade.length()==0 && creds == (int) creds) {
+				Course c = new Course(creds);
+				courseList.add(c);
+				String output = this.tostring();
+				courseListTextPane.setText(output);
+			}
+			else {
+				courseListTextPane.setText("");
+			}
+		}
+		
+		public void removeCourse(int courseNo) {
+			
+			if (courseList.size() >= courseNo) {
+				Course c = courseList.get(courseNo - 1);
+
+				courseList.remove(c);
+				reqGPALabel.setText("Required GPA: ");
+					
+				//Resetting the CourseListPane
+				courseListTextPane.setText("");
+					
+				String output = tostring();
+				courseListTextPane.setText(output);
+			}
+		}
+		
+		public void removeAllCourses() {
+			courseList.clear();
+			String empty = "";
+			courseListTextPane.setText(empty);
+			reqGPALabel.setText("Required GPA: ");
+		}
+		
+		public double calculateGPA() {
+			double numerator = 0;
+			int credstaken = 0;
+			
+			for (Course c : courseList) {
+				if (c.gradePoint > 0.0) {
+					numerator += c.gradePoint * c.creds;
+					credstaken += c.creds;
+				}
+			}
+			
+			double currentGPA = numerator / credstaken;
+			double df = (double) Math.round(currentGPA * 1000) / 1000;
+
+			return df;
+		}
+		
+		public double calculateDesiredGPA() {
+			
+			double numerator = 0;
+			int totalcredits = 0;
+			int credstaken = 0;
+			int credsnottaken = 0;
+			
+			for (Course c : courseList) {
+				totalcredits += c.creds;
+				
+				if (c.gradePoint > 0.0) {
+					numerator += c.gradePoint * c.creds;
+					credstaken += c.creds;
+				}
+				else {
+					credsnottaken += c.creds;
+				}
+			}
+			
+			double currentGPA = numerator / credstaken;
+			double desiredGPA = Double.parseDouble(desiredGPAtextField.getText());
+			double reqGPA = ((desiredGPA*totalcredits) - (currentGPA*credstaken)) / credsnottaken;
+			double df = (double) Math.round(reqGPA * 100) / 100;
+			reqGPALabel.setText("Required GPA: "+df);
+			
+			return reqGPA;
+		}
+		
+		public static void createAndShowGUI() {
+			GPA_Calculator2 frame = new GPA_Calculator2();
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setTitle("GPA Calculator");
+			frame.addComponentsToPane(frame.getContentPane());
+			frame.setLocationRelativeTo(null); //center the JFrame in the middle of the screen
+			frame.pack();
+			frame.setVisible(true);
+		}
+
+
+		public static void main(String[] args) {
+			javax.swing.SwingUtilities.invokeLater(new Runnable() {
+				public void run() {     
+					createAndShowGUI();
+				}
+			});
+		}
+
+
+	} //END Class
